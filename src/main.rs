@@ -55,13 +55,14 @@ fn main() -> anyhow::Result<()> {
             println!("Initialized git directory")
         }
         Command::CatFile {
-            pretty_print: _,
+            pretty_print,
             object_hash,
         } => {
             anyhow::ensure!(
                 pretty_print,
                 "mode must be given without -p, and we dont support mode."
             );
+
             let f = std::fs::File::open(format!(
                 ".git/objects/{}/{}",
                 &object_hash[..2],
