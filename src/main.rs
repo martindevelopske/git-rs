@@ -1,3 +1,4 @@
+use std::any;
 #[allow(unused_imports)]
 use std::env;
 use std::ffi::CStr;
@@ -57,6 +58,10 @@ fn main() -> anyhow::Result<()> {
             pretty_print: _,
             object_hash,
         } => {
+            anyhow::ensure!(
+                pretty_print,
+                "mode must be given without -p, and we dont support mode."
+            );
             let f = std::fs::File::open(format!(
                 ".git/objects/{}/{}",
                 &object_hash[..2],
@@ -78,7 +83,8 @@ fn main() -> anyhow::Result<()> {
                 .to_str()
                 .context(".git/objects file header is not valid UTF-8")?;
 
-            println!("the header is: {}", header);
+            // println!("the header is: {}", header);
+
             let Some((kind, size)) = header.split_once(' ') else {
                 anyhow::bail!(".git/objects file header did not start with 'blob': '{header}'")
             };
