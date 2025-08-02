@@ -14,3 +14,6 @@ flate2 = "1.0.34"                                # compression
 hex = "0.4.3"
 sha1 = "0.10.6"
 thiserror = "1.0.38"                             # error handling
+log = "0.4"
+env_logger = "0.10"
+dotenv = "0.15"

@@ -58,7 +58,7 @@ pub fn invoke(write: bool, file: PathBuf) -> anyhow::Result<()> {
             hasher: Sha1::new(),
         };
 
-        write!(writer, "blob ");
+        write!(writer, "blob ")?;
         write!(writer, "{}\0", stat.len())?;
         let mut content = std::fs::File::open(&file).with_context(|| "Opening file")?;
         std::io::copy(&mut content, &mut writer).context("copying content")?;

@@ -38,10 +38,14 @@ enum Command {
     LsTree {
         #[clap(long)]
         name_only: bool,
+
+        tree_hash: String,
     },
 }
 
 fn main() -> anyhow::Result<()> {
+    dotenv::dotenv().ok();
+    env_logger::init();
     // You can use print statements as follows for debugging, they'll be visible when running tests.
     eprintln!("Logs from your program will appear here!");
 
@@ -54,6 +58,9 @@ fn main() -> anyhow::Result<()> {
         } => commands::cat_file::invoke(pretty_print, object_hash),
         Command::HashObject { write, file } => commands::hash_object::invoke(write, file),
 
-        Command::LsTree { name_only } => commands::ls_tree::invoke(name_only),
+        Command::LsTree {
+            name_only,
+            tree_hash,
+        } => commands::ls_tree::invoke(name_only, &tree_hash),
     }
 }
