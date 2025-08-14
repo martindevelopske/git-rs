@@ -1,6 +1,3 @@
-use flate2::write::ZlibEncoder;
-use flate2::Compression;
-use sha1::{Digest, Sha1};
 #[allow(unused_imports)]
 use std::env;
 #[allow(unused_imports)]
@@ -11,25 +8,7 @@ use std::path::PathBuf;
 
 use anyhow::Context;
 
-struct HashWriter<W> {
-    writer: W,
-    hasher: Sha1,
-}
-
-impl<W> Write for HashWriter<W>
-where
-    W: Write,
-{
-    fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
-        let n = self.writer.write(buf)?;
-        self.hasher.update(&buf[..n]);
-        Ok(n)
-    }
-
-    fn flush(&mut self) -> std::io::Result<()> {
-        self.writer.flush()
-    }
-}
+use crate::objects::Object;
 
 pub fn invoke(write: bool, file: PathBuf) -> anyhow::Result<()> {
     // Reads the file.
@@ -51,19 +30,11 @@ pub fn invoke(write: bool, file: PathBuf) -> anyhow::Result<()> {
     where
         W: Write,
     {
-        let stat = std::fs::metadata(file).with_context(|| format!("stat {}", file.display()))?;
-        let writer = ZlibEncoder::new(writer, Compression::default());
-        let mut writer = HashWriter {
-            writer,
-            hasher: Sha1::new(),
-        };
+        let hash = Object::blob_from_file(file)
+            .context("open blob input file")?
+            .write(writer)
+            .context("Stream file into blob")?;
 
-        write!(writer, "blob ")?;
-        write!(writer, "{}\0", stat.len())?;
-        let mut content = std::fs::File::open(&file).with_context(|| "Opening file")?;
-        std::io::copy(&mut content, &mut writer).context("copying content")?;
-        let _ = writer.writer.finish();
-        let hash = writer.hasher.finalize();
         Ok(hex::encode(hash))
     }
 

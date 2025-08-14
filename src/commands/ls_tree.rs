@@ -7,6 +7,8 @@ use anyhow::Context;
 
 use crate::objects::{Kind, Object};
 
+/// tree entry format(structure):
+/// <mode> <filename>\0<20-byte SHA1>
 pub fn invoke(name_only: bool, tree_hash: &str) -> anyhow::Result<()> {
     // locating the git object(tree) from a ref like HEAD.
     // Decompressing the git object
